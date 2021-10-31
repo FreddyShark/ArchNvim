@@ -1,0 +1,186 @@
+#
+# wm independent hotkeys
+#
+
+######## heavy hitters
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd
+
+# quit/restart bspwm
+super + {alt,ctrl + } Escape
+	bspc {quit,wm -r}
+
+# terminal emulator
+super + Return
+	kitty
+
+super + {F1,F2,F3,F4,slash}
+	rofi -show {run,drun,ssh,file-browser,combi}
+
+super + F5
+	polybar-msg cmd toggle
+	
+super + F6
+	kitty zsh -c calcurse 
+	
+
+
+######## mouse control 
+# move cursor about a char
+super + alt + {k,l,j,h}
+	xdotool mousemove_relative {0 -16,16 0,0 16,-- -16 -0}
+# selection
+super + {v,w}
+	xdotool {mousedown 1 mousemove_relative 16 0,mouseup 1} 
+# clicks
+super + {o,p}
+	xdotool click {1,3}
+
+
+######## utils
+# screen capture
+Print
+	maim ~/Images/screenshots/$(date +%Y_%m_%d_%H_%M_%S_%N)_D.jpg
+
+alt + Print
+	maim | xclip -selection clipboard -t image/png
+
+super + Print
+	maim -i $(xdotool getactivewindow) ~/Images/screenshots/$(date +%Y_%m_%d_%H_%M_%S_%N)_W.jpg
+
+ctrl + Print
+	maim -sk ~/Images/screenshots/$(date +%Y_%m_%d_%H_%M_%S_%N)_S.jpg
+
+super + alt + Print
+	maim -i $(xdotool getactivewindow) | xclip -selection clipboard -t image/png
+
+super + ctrl + Print
+	maim -sk | xclip -selection clipboard -t image/png
+
+# volume
+super + {Prior,Next}
+	pulsemixer --change-volume {+,-}4
+
+super + Pause
+	pulsemixer --toggle-mute
+
+# media
+super + {Home,End}
+	playerctl -p mpv {previous,next} 
+
+super + {Insert,Delete}
+	playerctl -p mpv position 4{+,-} 
+
+super + Scroll_Lock
+	playerctl -a play-pause
+
+
+
+########## widnow/desktop montrol
+# close and kill
+super + bracketleft
+	bspc node -{c,k}
+
+# focus
+super + v
+	bspc node -a
+
+# alternate between the tiled and monocle layout
+super + Tab
+	bspc desktop -l next
+
+super + backslash
+	bspc node -R 90
+# send the newest marked node to the newest preselected node
+super + p
+	bspc node newest.marked.local -n newest.!automatic.local
+
+# swap the current node and the biggest window
+super + shift + g
+	bspc node -s biggest.window
+
+#
+# state/flags
+#
+
+# set the window state
+super + {_,shift} + comma
+	bspc node -t {tiled,pseudo_tiled}
+
+super + {_,shift} + period
+	bspc node -t {floating,fullscreen}
+
+# set the node flags
+super + {m,n,x,z}
+	bspc node -g {marked,sticky,locked,private}
+
+#
+# focus/swap
+#
+
+# focus the node in the given direction
+super + {_,shift + }{h,j,k,l}
+	bspc node -{f,s} {west,south,north,east}
+
+# focus the node for the given path jump
+super + {_,shift} + semicolon
+	bspc node -f @{parent,brother}
+
+super + {_,shift} + apostrophe
+	bspc node -f @{first,second}
+# focus the next/previous window in the current desktop
+super + {Right,Left}
+	bspc node -f {next,prev}.local.!hidden.window
+
+# focus the next/previous desktop in the current monitor
+super + {Down,Up}
+	bspc desktop -f {prev,next}.local
+
+# focus the last node/desktop
+super + {_,shift} + grave
+	bspc {node,desktop} -f last
+
+# focus the older or newer node in the focus history
+#super + {o,i}
+#	bspc wm -h off; \
+#	bspc node {older,newer} -f; \
+#	bspc wm -h on
+
+# focus or send to the given desktop
+super + {_,shift + }{1-8}
+	bspc {desktop -f,node -d} '^{1-8}'
+
+#
+# preselect
+
+# preselect the direction
+super + ctrl + {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+# preselect the ratio
+super + alt + {1-9}
+	bspc node -o 0.{1-9}
+
+# cancel the preselection for the focused node
+super + alt + space
+	bspc node -p cancel
+
+# cancel the preselection for the focused desktop
+super + alt + shift + space
+	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+
+# resize
+
+# expand a window by moving one of its side outward
+# cartesian x -up y -down 
+super + {9,minus,equal,0}
+	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+# contract a window by moving one of its side inward
+super + shift + {9,minus,equal,0}
+	bspc node -z {left 20 0,bottom 0 -20,top 0 20,right -20 0}
+
+# move a floating window
+#super + alt + {h,j,k,l}
+#	bspc node -v {-20 0,0 20,0 -20,20 0}
